@@ -23,6 +23,7 @@ This guide explains how release automation works across the genai-rs organizatio
 2. **Adjust the version if necessary**  
    - If you want to publish `0.8.0` instead of the proposed `0.7.1`, edit `Cargo.toml` (and regenerate `Cargo.lock` if present) in the PR branch to the desired semver.
    - Update `CHANGELOG.md` so the heading reflects the final version (`## [0.8.0]`) and the compare link points to `.../compare/v0.7.0...v0.8.0`.
+   - Keep the release commit aligned with the new version. Either amend the existing release commit (`git commit --amend -m "chore: release version <version>"`) to retain the single automation commit, or create a follow-up commit with a clear message (e.g. `chore: adjust release to 0.8.0`).
    - Run `cargo fmt`, `cargo check`, and any other relevant checks locally.
 
 3. **Review and merge the PR**  
@@ -47,4 +48,3 @@ This guide explains how release automation works across the genai-rs organizatio
 
 - `release-plz` only handles repositories configured with the workflow and `release-plz.toml`. For other repos, follow their local release instructions.
 - If you need to ship emergency fixes after a release fails, create a new release PR (manually or by re-running release-plz) to ensure automation takes over again.
-

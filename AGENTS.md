@@ -44,6 +44,8 @@ bd update <id> --status in_progress
 bd close <id> --reason "Completed"
 ```
 
+Whenever you create an issue, include the target repository in the title (for example, `openai-ergonomic: Document streaming helpers`). This makes the open-work listings actionable even without additional context.
+
 **Key Concepts:**
 - **Graph-based dependencies**: Issues chain together like beads
 - **Distributed via Git**: SQLite cache (local) + JSONL source of truth (committed)
