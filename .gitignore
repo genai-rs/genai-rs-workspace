@@ -1,0 +1,25 @@
+# Cloned repositories (all cloned into repos/ directory)
+repos/
+
+# Worktrees (created locally per developer/agent)
+worktrees/
+
+# Beads local cache (SQLite database)
+.beads/*.db
+.beads/*.db-*
+.beads/*.db-shm
+.beads/*.db-wal
+
+# macOS
+.DS_Store
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.log
