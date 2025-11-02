@@ -4,38 +4,30 @@ set -e
 echo "🔧 Setting up genai-rs workspace..."
 echo ""
 
-# Repository list with metadata
-declare -A repos=(
-  ["genai-ci-bot"]="GitHub App for minting short-lived CI tokens"
-  ["langfuse-client-base"]="Auto-generated low-level Langfuse API client"
-  ["langfuse-ergonomic"]="High-level Langfuse client with builder APIs"
-  ["langgraph-rs"]="LangGraph Python to Rust transpiler"
-  ["openai-client-base"]="Auto-generated OpenAI API bindings"
-  ["openai-ergonomic"]="Ergonomic OpenAI wrapper with streaming"
-  ["opentelemetry-langfuse"]="Langfuse OpenTelemetry exporter"
-  ["rmcp-demo"]="Rust MCP HTTP server demo"
-  [".github"]="Organization profile README"
+# Repository list - format: "repo_name|target_dir|description"
+repos=(
+  "genai-ci-bot|genai-ci-bot|GitHub App for minting short-lived CI tokens"
+  "langfuse-client-base|langfuse-client-base|Auto-generated low-level Langfuse API client"
+  "langfuse-ergonomic|langfuse-ergonomic|High-level Langfuse client with builder APIs"
+  "langgraph-rs|langgraph-rs|LangGraph Python to Rust transpiler"
+  "openai-client-base|openai-client-base|Auto-generated OpenAI API bindings"
+  "openai-ergonomic|openai-ergonomic|Ergonomic OpenAI wrapper with streaming"
+  "opentelemetry-langfuse|opentelemetry-langfuse|Langfuse OpenTelemetry exporter"
+  "rmcp-demo|rmcp-demo|Rust MCP HTTP server demo"
+  ".github|dot-github|Organization profile README"
 )
 
 # Clone repositories
-for repo in "${!repos[@]}"; do
-  target_dir="$repo"
-  # Handle .github special case (cloned as dot-github locally)
-  if [ "$repo" = ".github" ]; then
-    target_dir="dot-github"
-  fi
+for repo_info in "${repos[@]}"; do
+  IFS='|' read -r repo target_dir description <<< "$repo_info"
 
   if [ -d "$target_dir" ]; then
     echo "✓ $repo already exists, skipping..."
   else
     echo "📦 Cloning $repo..."
-    echo "   ${repos[$repo]}"
+    echo "   $description"
 
-    if [ "$repo" = ".github" ]; then
-      git clone "git@github.com:genai-rs/$repo.git" "$target_dir"
-    else
-      git clone "git@github.com:genai-rs/$repo.git"
-    fi
+    git clone "git@github.com:genai-rs/$repo.git" "$target_dir"
     echo ""
   fi
 done
