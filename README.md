@@ -34,17 +34,18 @@ genai-rs/
 │   └── worktree-helper.sh # Worktree management
 ├── worktrees/            # Per-issue git worktrees
 │
-# Independent repositories (gitignored, cloned by setup.sh):
-├── demo/
-├── genai-ci-bot/
-├── langfuse-client-base/
-├── langfuse-ergonomic/
-├── langgraph-rs/
-├── openai-client-base/
-├── openai-ergonomic/
-├── opentelemetry-langfuse/
-├── rmcp-demo/
-└── dot-github/
+# Independent repositories (gitignored, cloned into repos/ by setup.sh):
+└── repos/
+    ├── genai-ci-bot/
+    ├── langfuse-client-base/
+    ├── langfuse-ergonomic/
+    ├── langgraph-rs/
+    ├── openai-client-base/
+    ├── openai-ergonomic/
+    ├── opentelemetry-langfuse/
+    ├── rmcp-demo/
+    ├── dot-github/
+    └── demo/              # Local-only (copy manually if needed)
 ```
 
 ## Projects
@@ -74,11 +75,11 @@ bd ready
 bd update <issue-id> --status in_progress
 
 # Create worktree for isolated work
-cd <target-repo>
+cd repos/<target-repo>
 git checkout main
 git pull origin main
-git worktree add ../worktrees/<issue-id>-<repo>-<description> -b <issue-id>-<repo>-<description>
-cd ../worktrees/<issue-id>-<repo>-<description>
+git worktree add ../../worktrees/<issue-id>-<repo>-<description> -b <issue-id>-<repo>-<description>
+cd ../../worktrees/<issue-id>-<repo>-<description>
 
 # Make changes, commit, create PR
 git add .
@@ -140,7 +141,7 @@ This workspace repository tracks:
 - Empty `docs/` directory for shared documentation
 
 It **does not** track:
-- Individual project repositories (they're gitignored)
+- Individual project repositories (gitignored in `repos/`)
 - Worktrees (created locally per developer)
 - Beads SQLite cache (local only)
 

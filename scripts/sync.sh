@@ -4,6 +4,12 @@ set -e
 echo "🔄 Syncing all genai-rs repositories..."
 echo ""
 
+# Check if repos directory exists
+if [ ! -d "repos" ]; then
+  echo "⚠️  repos/ directory not found. Run ./scripts/setup.sh first."
+  exit 1
+fi
+
 # List of repository directories
 repos=(
   "genai-ci-bot"
@@ -21,12 +27,14 @@ repos=(
 failed_repos=()
 
 for repo in "${repos[@]}"; do
-  if [ ! -d "$repo" ]; then
+  repo_path="repos/$repo"
+
+  if [ ! -d "$repo_path" ]; then
     echo "⚠️  $repo: directory not found, skipping..."
     continue
   fi
 
-  if [ ! -d "$repo/.git" ]; then
+  if [ ! -d "$repo_path/.git" ]; then
     echo "⚠️  $repo: not a git repository, skipping..."
     continue
   fi
@@ -34,7 +42,7 @@ for repo in "${repos[@]}"; do
   echo "📥 Syncing $repo..."
 
   # Change to repo directory
-  cd "$repo"
+  cd "$repo_path"
 
   # Get current branch
   current_branch=$(git branch --show-current)
@@ -42,14 +50,14 @@ for repo in "${repos[@]}"; do
   # Check if we're on a branch (not detached HEAD)
   if [ -z "$current_branch" ]; then
     echo "   ⚠️  Detached HEAD state, skipping pull"
-    cd ..
+    cd ../..
     continue
   fi
 
   # Check for uncommitted changes
   if ! git diff-index --quiet HEAD --; then
     echo "   ⚠️  Uncommitted changes detected, skipping pull"
-    cd ..
+    cd ../..
     failed_repos+=("$repo (uncommitted changes)")
     continue
   fi
@@ -68,7 +76,7 @@ for repo in "${repos[@]}"; do
     fi
   fi
 
-  cd ..
+  cd ../..
   echo ""
 done
 

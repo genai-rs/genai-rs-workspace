@@ -71,13 +71,13 @@ bd ready
 bd update <issue-id> --status in_progress
 
 # IMPORTANT: Pull latest changes from origin/main before creating worktree
-cd <target-repo-folder>
+cd repos/<target-repo-folder>
 git checkout main
 git pull origin main
 
 # Create worktree for the issue
-git worktree add ../worktrees/<issue-id>-<repo>-<slug> -b <issue-id>-<repo>-<slug>
-cd ../worktrees/<issue-id>-<repo>-<slug>
+git worktree add ../../worktrees/<issue-id>-<repo>-<slug> -b <issue-id>-<repo>-<slug>
+cd ../../worktrees/<issue-id>-<repo>-<slug>
 
 # Work on the issue...
 ```
@@ -130,14 +130,14 @@ bd close <issue-id> --reason "PR merged" # or "Completed"
 **After issue completion:**
 
 ```bash
-# Navigate back to meta-repo
+# Navigate back to workspace root
 cd /Users/tim.van.wassenhove/src/genai-rs
 
 # Remove worktree
-git worktree remove worktrees/<issue-id>-<descriptive-name>
+cd repos/<target-repo-folder>
+git worktree remove ../../worktrees/<issue-id>-<descriptive-name>
 
 # Delete the branch (if merged)
-cd <target-repo-folder>
 git branch -d <issue-id>-<descriptive-name>
 
 # Clean up remote branch (if applicable)
@@ -282,14 +282,20 @@ git worktree remove worktrees/<name>
 
 ```
 genai-rs/
- .beads/              # Beads database (gitignored)
-    genai-rs.db      # SQLite cache
+ .beads/              # Beads database
+    genai-rs.db      # SQLite cache (gitignored)
     *.jsonl          # Source of truth (committed)
- worktrees/           # Active issue worktrees
+ repos/               # Cloned repositories (gitignored)
+    genai-ci-bot/
+    langfuse-*/
+    openai-*/
+    ...              # All project repos
+ worktrees/           # Active issue worktrees (gitignored)
     <issue-id>-*/    # Individual worktree folders
- docs/                # Documentation
- <repo-folders>/      # Individual repositories
+ docs/                # Shared documentation
+ scripts/             # Automation scripts
  AGENTS.md            # This file
+ README.md            # Workspace documentation
 ```
 
 ## References

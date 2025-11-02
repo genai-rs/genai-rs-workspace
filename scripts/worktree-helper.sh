@@ -87,22 +87,24 @@ function create_worktree() {
     exit 1
   fi
 
-  if [ ! -d "$repo" ]; then
-    echo -e "${RED}Error: Repository not found: $repo${NC}"
+  repo_path="repos/$repo"
+
+  if [ ! -d "$repo_path" ]; then
+    echo -e "${RED}Error: Repository not found: $repo_path${NC}"
     exit 1
   fi
 
   # Navigate to repo and create worktree
   echo ""
   echo -e "${YELLOW}Pulling latest changes from origin/main...${NC}"
-  cd "$repo"
+  cd "$repo_path"
   git checkout main
   git pull origin main
 
   echo -e "${YELLOW}Creating worktree: $worktree_name${NC}"
-  git worktree add "../${worktree_path}" -b "$worktree_name"
+  git worktree add "../../${worktree_path}" -b "$worktree_name"
 
-  cd ..
+  cd ../..
   echo ""
   echo -e "${GREEN}✓ Worktree created successfully!${NC}"
   echo ""
@@ -139,12 +141,13 @@ function remove_worktree() {
   # Extract repo name from worktree name (pattern: issue-id-repo-description)
   # This is a simple heuristic - assumes second segment is repo name
   repo=$(echo "$worktree_name" | cut -d'-' -f3)
+  repo_path="repos/$repo"
 
-  if [ -d "$repo" ]; then
-    cd "$repo"
+  if [ -d "$repo_path" ]; then
+    cd "$repo_path"
 
     # Remove worktree
-    git worktree remove "../$worktree"
+    git worktree remove "../../$worktree"
 
     # Ask about branch deletion
     read -p "Delete branch $worktree_name locally? [y/N] " -n 1 -r
@@ -164,7 +167,7 @@ function remove_worktree() {
       fi
     fi
 
-    cd ..
+    cd ../..
   fi
 
   echo -e "${GREEN}✓ Worktree removed successfully!${NC}"
@@ -190,23 +193,24 @@ function clean_worktrees() {
 
     # Extract repo name (heuristic)
     repo=$(echo "$worktree_name" | cut -d'-' -f3)
+    repo_path="repos/$repo"
 
-    if [ ! -d "$repo" ]; then
+    if [ ! -d "$repo_path" ]; then
       echo -e "${YELLOW}⚠️  Repository not found for $worktree_name, skipping${NC}"
       continue
     fi
 
-    cd "$repo"
+    cd "$repo_path"
 
     # Check if branch is merged into main
     if git branch --merged main | grep -q "$worktree_name"; then
       echo -e "${GREEN}✓ $worktree_name is merged${NC}"
-      git worktree remove "../$worktree"
+      git worktree remove "../../$worktree"
       git branch -d "$worktree_name" 2>/dev/null || true
       ((merged_count++))
     fi
 
-    cd ..
+    cd ../..
   done
 
   echo ""

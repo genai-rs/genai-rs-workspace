@@ -1,14 +1,5 @@
-# Cloned repositories (managed independently as git submodules/clones)
-demo/
-genai-ci-bot/
-langfuse-client-base/
-langfuse-ergonomic/
-langgraph-rs/
-openai-client-base/
-openai-ergonomic/
-opentelemetry-langfuse/
-rmcp-demo/
-dot-github/
+# Cloned repositories (all cloned into repos/ directory)
+repos/
 
 # Worktrees (created locally per developer/agent)
 worktrees/
