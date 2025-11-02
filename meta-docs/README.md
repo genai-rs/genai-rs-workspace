@@ -5,6 +5,7 @@ This directory contains organization-level documentation and analysis that spans
 ## Contents
 
 - **RENOVATE_ANALYSIS.md** - Comparative analysis of Renovate configuration across genai-rs repositories, evaluating dependency management strategies for library crates vs applications.
+- **RELEASE_AUTOMATION.md** - Playbook describing how release-plz-driven automation publishes new crate versions and how to adjust release PRs before merging.
 
 ## Purpose
 
