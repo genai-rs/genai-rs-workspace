@@ -1,0 +1,34 @@
+# Cloned repositories (managed independently as git submodules/clones)
+demo/
+genai-ci-bot/
+langfuse-client-base/
+langfuse-ergonomic/
+langgraph-rs/
+openai-client-base/
+openai-ergonomic/
+opentelemetry-langfuse/
+rmcp-demo/
+dot-github/
+
+# Worktrees (created locally per developer/agent)
+worktrees/
+
+# Beads local cache (SQLite database)
+.beads/*.db
+.beads/*.db-*
+.beads/*.db-shm
+.beads/*.db-wal
+
+# macOS
+.DS_Store
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.log
