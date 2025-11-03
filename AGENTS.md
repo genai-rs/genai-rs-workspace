@@ -305,6 +305,7 @@ genai-rs/
 - **Beads**: https://github.com/steveyegge/beads
 - **Organization**: https://github.com/genai-rs
 - **Tool Framework**: See `docs/tool_framework.md`
+- **Just Tasks**: See `docs/just-recipes.md`
 
 ---
 
