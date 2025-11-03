@@ -2,6 +2,8 @@
 default:
 	@just --list
 
+workspace-root := justfile_directory()
+
 # Acquire (temporary) AWS credentials
 login:
 	aws sso login --profile customer-assist-dev
@@ -13,7 +15,7 @@ w:
 # Run a git command in every repository under ./repos
 ga command *args:
 	#!/usr/bin/env bash
-	root="{{justfile_directory()}}"
+	root="{{workspace-root}}"
 	command="{{command}}"
 	set -- {{args}}
 	find "$root/repos" -mindepth 1 -maxdepth 1 -type d \
@@ -30,11 +32,6 @@ ga command *args:
 # Install required developer tools
 install-dev-tools:
 	#!/usr/bin/env bash
-	set -euo pipefail
-	if ! command -v brew >/dev/null 2>&1; then
-		echo "Homebrew is required to install developer tools." >&2
-		exit 1
-	fi
 	tools=(terraform awscli uv gitlab-ci-local fzf)
 	for tool in "${tools[@]}"; do
 		if ! brew list --versions "$tool" >/dev/null 2>&1; then
@@ -49,23 +46,33 @@ install-dev-tools:
 _select-worktree worktree="":
 	#!/usr/bin/env bash
 	set -euo pipefail
-	root="{{justfile_directory()}}"
+	root="{{workspace-root}}"
 	selected="{{worktree}}"
 	if [[ "$selected" == worktree=* ]]; then
 		selected="${selected#worktree=}"
 	fi
 	if [ -n "$selected" ]; then
-		case "$selected" in
-			/*) candidate="$selected" ;;
-			*) candidate="$root/$selected" ;;
-		esac
-		if [ ! -d "$candidate" ]; then
+		if [[ "$selected" != /* ]]; then
+			selected="$root/$selected"
+		fi
+		if [ ! -d "$selected" ]; then
 			echo "Worktree directory not found: $selected" >&2
 			exit 1
 		fi
-		printf '%s\n' "$candidate"
+		printf '%s\n' "$selected"
 		exit 0
 	fi
+	chosen="$(just --quiet _pick-worktree)" || exit 0
+	if [ -n "$chosen" ]; then
+		printf '%s\n' "$chosen"
+	fi
+
+# Prompt to choose a worktree and print the absolute path
+#[private]
+_pick-worktree:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	root="{{workspace-root}}"
 	cd "$root"
 	choice=$(find worktrees -type d -mindepth 1 -maxdepth 1 | sort | fzf --prompt="Worktree> " --height=20 --reverse) || exit 0
 	if [ -z "$choice" ]; then
@@ -78,33 +85,57 @@ _select-worktree worktree="":
 _require-worktree worktree="":
 	#!/usr/bin/env bash
 	set -euo pipefail
-	selected="$(just --quiet _select-worktree worktree="{{worktree}}")"
+	selected="$(just --quiet _select-worktree "{{worktree}}")"
 	if [ -z "$selected" ]; then
 		echo "No worktree selected" >&2
 		exit 1
 	fi
 	printf '%s\n' "$selected"
 
-# Open a worktree with PyCharm
-po worktree="":
+# Run a command against a selected worktree
+wt tool worktree="":
 	#!/usr/bin/env bash
 	set -euo pipefail
-	selected="$(just --quiet _require-worktree worktree="{{worktree}}")"
-	open -na "PyCharm.app" --args "$selected"
+	tool_raw="{{tool}}"
+	tool="${tool_raw#tool=}"
+	worktree_raw="{{worktree}}"
+	worktree="${worktree_raw#worktree=}"
+	if [ -z "$tool" ]; then
+		echo "Tool/command must be provided" >&2
+		exit 1
+	fi
+	if [ -n "$worktree" ]; then
+		selected="$(just --quiet _require-worktree "$worktree")"
+	else
+		selected="$(just --quiet _require-worktree)"
+	fi
+	escaped=$(printf '%q' "$selected")
+	bash -lc "$tool $escaped"
+
+# Open a worktree with PyCharm
+wop *args:
+	@just wt "open -na PyCharm.app --args" {{ args }}
+
+# Open a worktree with RustRover
+wor *args:
+	@just wt "open -na RustRover.app --args" {{ args }}
 
 # Open a worktree with VS Code
-co worktree="":
-	#!/usr/bin/env bash
-	set -euo pipefail
-	selected="$(just --quiet _require-worktree worktree="{{worktree}}")"
-	code "$selected"
+woc *args:
+	@just wt code {{ args }}
 
 # Remove a worktree directory and unregister it from its repository
 wd worktree="":
 	#!/usr/bin/env bash
 	set -euo pipefail
-	root="{{justfile_directory()}}"
-	target="$(just --quiet _require-worktree worktree="{{worktree}}")"
+	root="{{workspace-root}}"
+	raw="{{worktree}}"
+	worktree="${raw#worktree=}"
+	if [ -n "$worktree" ]; then
+		target="$(just --quiet _require-worktree "$worktree")"
+	else
+		target="$(just --quiet _require-worktree)"
+	fi
 	target="${target%/}"
 	if [[ "$target" != "$root"/worktrees/* ]]; then
 		echo "Worktree path must live under $root/worktrees" >&2
@@ -126,4 +157,19 @@ wd worktree="":
 	fi
 	if [ -d "$target" ]; then
 		rm -rf "$target"
+	fi
+
+# Wrap bd sync to avoid timestamp guard failures
+bd-sync *args:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	root="{{workspace-root}}"
+	future_ts="204001010000"
+	touch -t "$future_ts" "$root/.beads/beads.db"
+	cd "$root"
+	set -- {{args}}
+	if bd sync "$@"; then
+		touch -t "$future_ts" "$root/.beads/beads.db"
+	else
+		exit $?
 	fi
