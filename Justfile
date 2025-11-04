@@ -124,6 +124,57 @@ wor *args:
 woc *args:
 	@just wt code {{ args }}
 
+# Open a new iTerm tab, defaulting to the workspace root
+iterm-tab dir="":
+	#!/usr/bin/env bash
+	set -euo pipefail
+	target="{{dir}}"
+	if [[ "$target" == dir=* ]]; then
+		target="${target#dir=}"
+	fi
+	if [ -z "$target" ]; then
+		target="{{workspace-root}}"
+	elif [[ "$target" != /* ]]; then
+		target="{{workspace-root}}/$target"
+	fi
+	export TARGET_DIR="$target"
+	osascript \
+		-e 'set targetDir to system attribute "TARGET_DIR"' \
+		-e 'if targetDir is missing value then return' \
+		-e 'tell application "iTerm2"' \
+		-e 'activate' \
+		-e 'if (count of windows) = 0 then' \
+		-e 'set targetWindow to (create window with default profile)' \
+		-e 'tell current session of targetWindow' \
+		-e 'write text "cd " & quoted form of targetDir' \
+		-e 'end tell' \
+		-e 'else' \
+		-e 'tell current window' \
+		-e 'create tab with default profile' \
+		-e 'tell current session of current tab' \
+		-e 'write text "cd " & quoted form of targetDir' \
+		-e 'end tell' \
+		-e 'end tell' \
+		-e 'end if' \
+		-e 'end tell'
+
+# Open a worktree in a new iTerm tab
+woi worktree="":
+	#!/usr/bin/env bash
+	set -euo pipefail
+	raw="{{worktree}}"
+	worktree="${raw#worktree=}"
+	if [ -n "$worktree" ]; then
+		selected="$(just --quiet _require-worktree "$worktree")"
+	else
+		selected="$(just --quiet _require-worktree)"
+	fi
+	if [ -z "$selected" ]; then
+		echo "No worktree selected" >&2
+		exit 1
+	fi
+	just iterm-tab "$selected"
+
 # Remove a worktree directory and unregister it from its repository
 wd worktree="":
 	#!/usr/bin/env bash
