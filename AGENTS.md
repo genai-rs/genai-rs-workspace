@@ -174,7 +174,7 @@ This ensures cleanup happens systematically and is tracked.
 1. **Always check beads first**: Run `bd ready` to find available work
 2. **Update issue status**: Move to `in_progress` when starting
 3. **Pull before starting**: Always `git pull origin main` before creating a worktree to ensure you're working with the latest code
-4. **Use worktrees**: Create isolated environments for each issue
+4. **Use worktrees**: Create isolated environments for each issue; keep the clone in `repos/<repo>` parked on `main` and attach every issue branch via `git worktree add ../../worktrees/<issue>-<repo>-<slug> …`
 5. **File discovered issues**: Don't let context slip - create issues immediately
 6. **Link dependencies**: Use `bd dep` to maintain the issue graph
 7. **Wait for CI and merge**: After creating a PR, monitor CI checks and wait for the PR to be merged before closing the issue. Use `gh pr checks` and `gh pr view` to monitor status.
