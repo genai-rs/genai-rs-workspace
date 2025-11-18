@@ -1,8 +1,23 @@
+export PYTHONPATH:="/Users/tim.van.wassenhove/src/github/continuous-codex/src"
+
 # Print available tasks
 default:
 	@just --list
 
 workspace-root := justfile_directory()
+
+info:
+	printenv
+
+status:
+	uv run --project /Users/tim.van.wassenhove/src/github/continuous-codex python -m continuous_codex.status_overview
+
+next:
+	uv run --project /Users/tim.van.wassenhove/src/github/continuous-codex python -m continuous_codex.cli --next-ready
+
+supervise:
+	uv run --project /Users/tim.van.wassenhove/src/github/continuous-codex python -m continuous_codex.supervisor
+
 
 # Acquire (temporary) AWS credentials
 login:
